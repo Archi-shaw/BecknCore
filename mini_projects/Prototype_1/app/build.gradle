@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'com.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://maven.jitsi.org'
+    }
+}
+
+dependencies {
+    implementation 'org.slf4j:slf4j-api:1.7.36'
+    implementation 'org.slf4j:slf4j-simple:1.7.36'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+application {
+    mainClassName = 'prototype_1.StunClient'
+}
