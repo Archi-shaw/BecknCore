@@ -3,7 +3,7 @@ plugins {
     id("application")
 }
 
-group = "org.beckn"  // Changed from java.prototype_3
+group = "org.beckn" 
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -11,20 +11,17 @@ repositories {
 }
 
 dependencies {
-    // Standard Netty dependencies
     implementation("io.netty:netty-all:4.1.100.Final")
     
-    // SLF4J for logging
     implementation("org.slf4j:slf4j-api:1.7.36")
     implementation("org.slf4j:slf4j-simple:1.7.36")
     
-    // JUnit Jupiter for testing
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.1")
 }
 
 application {
-    mainClass.set("org.beckn.prototype_3.HttpServer")  // Changed package name here
+    mainClass.set("org.beckn.prototype_3.HttpServer")  
 }
 
 tasks.test {

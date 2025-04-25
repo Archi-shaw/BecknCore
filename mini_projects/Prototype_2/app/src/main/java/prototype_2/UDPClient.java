@@ -10,13 +10,11 @@ public class UDPClient {
         InetAddress address = InetAddress.getByName("127.0.0.1");
         int port = 3478;
 
-        // Send message
         String message = "Hello, UDP!";
         byte[] buffer = message.getBytes();
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
         socket.send(packet);
 
-        // Receive response
         buffer = new byte[1024];
         packet = new DatagramPacket(buffer, buffer.length);
         socket.receive(packet);

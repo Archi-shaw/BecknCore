@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'java.prototype_5'
+version = '1.0-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Netty core dependencies
+    implementation 'io.netty:netty-all:4.1.86.Final'
+    
+    // For HTTP/3 (QUIC) support
+    implementation 'io.netty.incubator:netty-incubator-codec-http3:0.0.18.Final'
+    implementation 'io.netty.incubator:netty-incubator-codec-native-quic:0.0.45.Final'
+    
+    // STUN protocol support
+    implementation 'org.jitsi:ice4j:3.0-24-g34c2ce5'
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.5'
+    implementation 'ch.qos.logback:logback-classic:1.4.7'
+    
+    // Testing
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+}
+
+application {
+    mainClass = 'java.prototype_5.App'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// Task to generate certificates for QUIC/HTTP3
+task generateCertificates(type: Exec) {
+    commandLine 'bash', '-c', '''
+        mkdir -p src/main/resources/certs
+        cd src/main/resources/certs
+        
+        # Generate a private key
+        openssl genrsa -out private.key 2048
+        
+        # Generate self-signed certificate
+        openssl req -new -x509 -key private.key -out cert.crt -days 365 -subj "/CN=localhost"
+    '''
+    
+    onlyIf { !file('src/main/resources/certs/cert.crt').exists() }
+}
+
+processResources.dependsOn generateCertificates

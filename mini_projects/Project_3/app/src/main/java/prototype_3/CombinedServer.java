@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class CombinedServer {
     private static final Logger logger = LoggerFactory.getLogger(CombinedServer.class);
-    private static final int PORT = 3478; // Standard STUN port
+    private static final int PORT = 3478; 
 
     public static void main(String[] args) throws Exception {
         EventLoopGroup group = new NioEventLoopGroup();

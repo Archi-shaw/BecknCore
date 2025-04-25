@@ -19,10 +19,8 @@ public class CombinedServerHandler extends SimpleChannelInboundHandler<DatagramP
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket packet) {
-        // Extract the content from the packet
         ByteBuf content = packet.content();
         
-        // Check if the packet is a STUN request
         if (isStunRequest(content)) {
             logger.info("Received STUN request from: {}", packet.sender());
             handleStun(ctx, packet);
@@ -33,21 +31,17 @@ public class CombinedServerHandler extends SimpleChannelInboundHandler<DatagramP
     }
 
     private boolean isStunRequest(ByteBuf buf) {
-        // STUN packet must have at least 20 bytes
         if (buf.readableBytes() < 20) {
             return false;
         }
         
-        // Check header format: first 2 bits must be 0
         int firstByte = buf.getUnsignedByte(buf.readerIndex());
-        if ((firstByte & 0xC0) != 0) {  // 0xC0 = binary 11000000
+        if ((firstByte & 0xC0) != 0) { 
             return false;
         }
         
-        // Check message type (binding request = 0x0001)
         int messageType = buf.getUnsignedShort(buf.readerIndex());
         
-        // Check magic cookie at offset 4 (after message type and length)
         int magicCookie = buf.getInt(buf.readerIndex() + 4);
         
         return messageType == STUN_BINDING_REQUEST && magicCookie == MAGIC_COOKIE;
@@ -56,34 +50,26 @@ public class CombinedServerHandler extends SimpleChannelInboundHandler<DatagramP
     private void handleStun(ChannelHandlerContext ctx, DatagramPacket packet) {
         ByteBuf request = packet.content();
         
-        // Create response buffer
         ByteBuf response = Unpooled.buffer(32);
         
-        // Copy the first 20 bytes, but change message type to Success Response
-        response.writeShort(STUN_BINDING_RESPONSE);  // Message Type: Binding Success Response
+        response.writeShort(STUN_BINDING_RESPONSE);  
         
-        // Message Length: 8 bytes (for the XOR-MAPPED-ADDRESS attribute)
         response.writeShort(12);
         
-        // Magic Cookie (same as request)
         response.writeInt(MAGIC_COOKIE);
         
-        // Transaction ID (copy from request)
         byte[] transactionId = new byte[12];
         request.getBytes(8, transactionId);
         response.writeBytes(transactionId);
         
-        // Add XOR-MAPPED-ADDRESS attribute
-        response.writeShort(0x0020);  // XOR-MAPPED-ADDRESS attribute type
-        response.writeShort(8);       // Attribute length
-        response.writeByte(0);        // Reserved
-        response.writeByte(1);        // Family (IPv4)
+        response.writeShort(0x0020);  
+        response.writeShort(8);       
+        response.writeByte(0);        
+        response.writeByte(1);       
         
-        // XOR-mapped port: XOR with most significant 16 bits of magic cookie
         int port = packet.sender().getPort();
         response.writeShort(port ^ (MAGIC_COOKIE >> 16));
         
-        // XOR-mapped address: XOR with magic cookie
         byte[] ipBytes = packet.sender().getAddress().getAddress();
         int ipInt = ((ipBytes[0] & 0xFF) << 24) | 
                     ((ipBytes[1] & 0xFF) << 16) | 
@@ -91,7 +77,6 @@ public class CombinedServerHandler extends SimpleChannelInboundHandler<DatagramP
                     (ipBytes[3] & 0xFF);
         response.writeInt(ipInt ^ MAGIC_COOKIE);
         
-        // Send the response
         ctx.writeAndFlush(new DatagramPacket(response, packet.sender()));
         
         logger.info("Sent STUN response with XOR-mapped address {}:{} to {}", 
@@ -103,7 +88,6 @@ public class CombinedServerHandler extends SimpleChannelInboundHandler<DatagramP
     private void echoMessage(ChannelHandlerContext ctx, DatagramPacket packet) {
         ByteBuf content = packet.content();
         
-        // For text messages, log the content
         if (isTextMessage(content)) {
             String message = content.toString(CharsetUtil.UTF_8);
             logger.info("Received message: {}", message);
@@ -111,13 +95,11 @@ public class CombinedServerHandler extends SimpleChannelInboundHandler<DatagramP
             logger.info("Received binary data of {} bytes", content.readableBytes());
         }
         
-        // Create a copy of the content and echo it back
         ByteBuf echoed = Unpooled.copiedBuffer(content);
         ctx.writeAndFlush(new DatagramPacket(echoed, packet.sender()));
     }
     
     private boolean isTextMessage(ByteBuf content) {
-        // Simple heuristic: check if all bytes are printable ASCII or common control chars
         ByteBuf copy = content.copy();
         try {
             while (copy.isReadable()) {

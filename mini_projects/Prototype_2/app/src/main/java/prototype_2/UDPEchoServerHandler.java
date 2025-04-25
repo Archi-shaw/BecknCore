@@ -7,7 +7,6 @@ import io.netty.channel.socket.DatagramPacket;
 public class UDPEchoServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket packet) {
-        // Echo the received packet back to the sender
         ctx.writeAndFlush(new DatagramPacket(
                 packet.content().retainedDuplicate(),
                 packet.sender()));
@@ -15,7 +14,6 @@ public class UDPEchoServerHandler extends SimpleChannelInboundHandler<DatagramPa
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        // Handle exceptions
         cause.printStackTrace();
         ctx.close();
     }

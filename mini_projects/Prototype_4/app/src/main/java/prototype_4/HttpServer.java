@@ -1,4 +1,4 @@
-package org.beckn.prototype_3;  // Changed from java.prototype_3
+package org.beckn.prototype_3; 
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
@@ -17,7 +17,6 @@ public class HttpServer {
     public static void main(String[] args) throws Exception {
         System.out.println("Starting HTTP server on port " + PORT);
         
-        // Configure the server
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         
@@ -36,17 +35,14 @@ public class HttpServer {
                                 protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
                                     System.out.println("Received HTTP request: " + request.uri());
                                     
-                                    // Create the response
                                     FullHttpResponse response = new DefaultFullHttpResponse(
                                             HttpVersion.HTTP_1_1, 
                                             HttpResponseStatus.OK,
                                             Unpooled.copiedBuffer("Hello from Beckn", CharsetUtil.UTF_8));
                                     
-                                    // Set headers
                                     response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
                                     response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
                                     
-                                    // Write the response
                                     ctx.writeAndFlush(response)
                                         .addListener(ChannelFutureListener.CLOSE);
                                     
@@ -56,15 +52,12 @@ public class HttpServer {
                     }
                 });
             
-            // Start the server
             Channel channel = b.bind(new InetSocketAddress(PORT)).sync().channel();
             System.out.println("HTTP server started and listening on port " + PORT);
             
-            // Wait until the server socket is closed
             channel.closeFuture().sync();
             
         } finally {
-            // Shut down all event loops
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
             System.out.println("HTTP server shutdown");
